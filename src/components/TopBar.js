@@ -30,7 +30,7 @@ export default function ButtonAppBar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            News
+            Toilet Finder <span role="img" aria-label="toilet">🚽</span>
           </Typography>
           <Button color="inherit">Login</Button>
         </Toolbar>

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from 'react-dom';
+// import './App.css';
 
 //Places API
 import {
@@ -16,6 +17,7 @@ usePlacesAutocomplete,
   getLatLng
 } from 'use-places-autocomplete'
 
+
 //Display results
 import {
   Combobox,
@@ -24,15 +26,22 @@ import {
   ComboboxList,
   ComboboxOption
 } from '@reach/combobox'
-import '@reach/combobox/styles.css'
+
 
 //Material UI
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import Fab from '@material-ui/core/Fab';
+import AddIcon from '@material-ui/icons/Add';
+import NavigationIcon from '@material-ui/icons/Navigation';
 
-//Components
-import TopBar from './components/TopBar'
+import '@reach/combobox/styles.css'
 
-//Styles and Markers
 import mapStyles from './mapStyles'
 import toiletMarker from './img/toilet-marker.svg'
 
@@ -51,8 +60,37 @@ const
     disableDefaultUI: true,
   }
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    color: '#fff'
+  },
+  addNewBtn: {
+    margin: theme.spacing(1),
+    position: 'absolute',
+    bottom: 20, 
+    right: 20,
+    zIndex: 5
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1),
+  },
+  locateBtn: {
+    marginLeft: 'auto',
+    boxShadow: 'none !important',
+    // borderRadius: 0
+  },
+
+}));
+
 export default function App() {
 
+  const classes = useStyles();
 
   //Google Maps set up, set api key and tell what library to use
   const { isLoaded, loadError } = useLoadScript({
@@ -94,10 +132,24 @@ export default function App() {
   if(!isLoaded) return "Loading Maps..."
   return (
     <div className="App">
+      <div className={classes.root}>
+        <AppBar position="fixed">
+          <Toolbar>
+            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" className={classes.title}>
+              Toilet Finder <span role="img" aria-label="toilet">🚽</span>
+            </Typography>
+            <Locate panTo={ panTo } />
+          </Toolbar>
+        </AppBar>
+      </div>
       {/* <h1>Toilet Finder <span role="img" aria-label="toilet">🚽</span></h1>
       <Search panTo={ panTo } />
       <Locate panTo={ panTo } /> */}
-      <TopBar />
+
+      <FloatingActionButtonSize />
 
     <GoogleMap
       mapContainerStyle={ mapContainerStyle }
@@ -155,9 +207,9 @@ export default function App() {
 }
 
 function Locate({ panTo }){
+  const classes = useStyles();
   return (
-    <Button
-    style={{ fontSize: '3rem', paddingHorizontal: 50}}
+    <Fab
     onClick={() => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -169,11 +221,18 @@ function Locate({ panTo }){
         () => null
       );
     }}
-    >🧭</Button>
+    variant="extended"
+    color="primary"
+    aria-label="locate"
+    className={classes.locateBtn}
+    >
+      <NavigationIcon className={classes.extendedIcon} /><Typography variant="p" className={classes.title}>Locate Me</Typography>
+    </Fab>
   )
 }
 
 function Search({ panTo }) {
+
   const {
     ready,
     value,
@@ -231,4 +290,24 @@ function Search({ panTo }) {
     </div>
   )
 
+}
+
+function FloatingActionButtonSize() {
+  const classes = useStyles();
+
+  return (
+    <Fab
+      variant="extended"
+      color="primary"
+      aria-label="add"
+      className={classes.addNewBtn}
+      onClick={ () => {
+          console.log('adding new')
+        }
+      }
+    >
+      <AddIcon className={classes.extendedIcon} />
+      Add New
+    </Fab>
+  );
 }
