@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from 'react-dom';
-// import './App.css';
+import './App.css';
 
 //Places API
 import {
@@ -40,10 +40,23 @@ import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import NavigationIcon from '@material-ui/icons/Navigation';
 
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControl from '@material-ui/core/FormControl';
+import FormHelperText from '@material-ui/core/FormHelperText';
+
 import '@reach/combobox/styles.css'
 
 import mapStyles from './mapStyles'
 import toiletMarker from './img/toilet-marker.svg'
+
 
 const
   libraries = ['places'],
@@ -141,6 +154,7 @@ export default function App() {
             <Typography variant="h6" className={classes.title}>
               Toilet Finder <span role="img" aria-label="toilet">🚽</span>
             </Typography>
+            <Search panTo={ panTo } />
             <Locate panTo={ panTo } />
           </Toolbar>
         </AppBar>
@@ -149,8 +163,8 @@ export default function App() {
       <Search panTo={ panTo } />
       <Locate panTo={ panTo } /> */}
 
-      <FloatingActionButtonSize />
-
+      {/* <FloatingActionButtonSize /> */}
+      <FormDialog />
     <GoogleMap
       mapContainerStyle={ mapContainerStyle }
       zoom={15}
@@ -226,7 +240,7 @@ function Locate({ panTo }){
     aria-label="locate"
     className={classes.locateBtn}
     >
-      <NavigationIcon className={classes.extendedIcon} /><Typography variant="p" className={classes.title}>Locate Me</Typography>
+      <NavigationIcon className={classes.extendedIcon} /><Typography variant="body1" className={classes.title}>Locate Me</Typography>
     </Fab>
   )
 }
@@ -276,7 +290,7 @@ function Search({ panTo }) {
           disabled={ !ready }
           placeholder="Start typing a place name or address..."
         />
-        <ComboboxPopover>
+        <ComboboxPopover style={{ paddingTop: 10 }}>
           <ComboboxList>
           {status === 'OK' && data.map( ( { id, description}) => (
             <ComboboxOption
@@ -289,25 +303,122 @@ function Search({ panTo }) {
       </Combobox>
     </div>
   )
-
 }
 
-function FloatingActionButtonSize() {
-  const classes = useStyles();
+
+function FormDialog( panTo ) {
+  const [open, setOpen] = React.useState(false)
+  const [checkboxes, setCheckboxes] = React.useState({
+    checkedA: false,
+    checkedB: false
+  })
+  const [notes, setNotes] = React.useState('');
+  // const [searchedPlace, setSearchedPlace] = React.useState({
+  //   lat: null,
+  //   lng: null,
+  //    name: ''
+  // });
+
+  const classes = useStyles()
+
+  const handleClickOpen = () => {
+    setOpen(true)
+  };
+
+  const handleFormClose = () => {
+    setOpen(false)
+  };
+
+  const handleFormSubmit = () => {
+    // setDetails(details)
+    error
+    ? console.log('there is an error')
+    : console.log('submitted', checkboxes.checkedA, checkboxes.checkedB, notes ? notes : null )
+
+  };
+
+  const handleCheckChange = (event) => {
+    setCheckboxes({ ...checkboxes, [event.target.name]: event.target.checked });
+  };
+
+  const handleNotesChange = (event) => {
+    setNotes(event.target.value);
+  };
+
+  const error = [checkboxes.checkedA, checkboxes.checkedB].filter((v) => v).length === 0;
 
   return (
-    <Fab
+    <div className="dialog">
+      <Fab
       variant="extended"
       color="primary"
       aria-label="add"
       className={classes.addNewBtn}
-      onClick={ () => {
-          console.log('adding new')
-        }
-      }
+      onClick={ handleClickOpen }
     >
       <AddIcon className={classes.extendedIcon} />
       Add New
     </Fab>
+      <Dialog open={open} onClose={handleFormClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Log New Toilet</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter details below to add a new toilet to the map.
+          </DialogContentText>
+        
+          {/* Types of toilets */}
+          <FormControl required error={error} component="fieldset" className={classes.formControl}>
+            <FormGroup row>
+              
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkboxes.checkedA}
+                    onChange={handleCheckChange}
+                    name="checkedA"
+                    color="primary"
+                  />
+                }
+                label="Accessible"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checkboxes.checkedB}
+                    onChange={handleCheckChange}
+                    name="checkedB"
+                    color="primary"
+                  />
+                }
+                label="True Gender Neutral"
+
+              />
+              </FormGroup>
+              <FormHelperText>Select at least one type of Toilet</FormHelperText>
+          </FormControl>
+
+            {/* notes  */}
+            <TextField
+              autoFocus
+              margin="dense"
+              id="notes"
+              label="Notes"
+              multiline
+              rows={4}
+              placeholder="Add details here such as 'Second floor on the right'"
+              fullWidth
+              onChange={ handleNotesChange }
+            />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleFormClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleFormSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 }
